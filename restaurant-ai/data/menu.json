@@ -1,0 +1,253 @@
+{
+  "categories": [
+    {
+      "name": "Appetizers",
+      "items": [
+        {
+          "id": 1,
+          "name": "Caesar Salad",
+          "price": 12.99,
+          "keywords": ["caesar", "salad", "romaine"],
+          "dietary": ["vegetarian"]
+        },
+        {
+          "id": 2,
+          "name": "Soup of the Day",
+          "price": 8.99,
+          "keywords": ["soup"],
+          "dietary": []
+        },
+        {
+          "id": 3,
+          "name": "Bruschetta",
+          "price": 10.99,
+          "keywords": ["bruschetta", "tomato", "bread"],
+          "dietary": ["vegetarian"]
+        },
+        {
+          "id": 4,
+          "name": "Crispy Calamari",
+          "price": 14.99,
+          "keywords": ["calamari", "fried calamari", "squid"],
+          "dietary": []
+        },
+        {
+          "id": 5,
+          "name": "Spinach Artichoke Dip",
+          "price": 11.99,
+          "keywords": ["spinach", "artichoke", "dip"],
+          "dietary": ["vegetarian"]
+        }
+      ]
+    },
+    {
+      "name": "Entrees",
+      "items": [
+        {
+          "id": 10,
+          "name": "Grilled Atlantic Salmon",
+          "price": 28.99,
+          "keywords": ["salmon", "fish", "grilled salmon"],
+          "dietary": ["gluten-free"]
+        },
+        {
+          "id": 11,
+          "name": "12oz Ribeye Steak",
+          "price": 38.99,
+          "keywords": ["steak", "ribeye", "beef", "12oz ribeye"],
+          "dietary": ["gluten-free"]
+        },
+        {
+          "id": 12,
+          "name": "Chicken Parmesan",
+          "price": 24.99,
+          "keywords": ["chicken", "parmesan", "chicken parm"],
+          "dietary": []
+        },
+        {
+          "id": 13,
+          "name": "Pasta Primavera",
+          "price": 19.99,
+          "keywords": ["pasta", "primavera", "vegetables"],
+          "dietary": ["vegetarian"]
+        },
+        {
+          "id": 14,
+          "name": "Maine Lobster Tail",
+          "price": 45.99,
+          "keywords": ["lobster", "lobster tail"],
+          "dietary": ["gluten-free"]
+        },
+        {
+          "id": 15,
+          "name": "Lamb Chops",
+          "price": 36.99,
+          "keywords": ["lamb", "lamb chops"],
+          "dietary": ["gluten-free"]
+        },
+        {
+          "id": 16,
+          "name": "Filet Mignon",
+          "price": 42.99,
+          "keywords": ["filet", "mignon", "filet mignon", "beef"],
+          "dietary": ["gluten-free"]
+        },
+        {
+          "id": 17,
+          "name": "Grilled Vegetable Platter",
+          "price": 18.99,
+          "keywords": ["vegetable", "grilled vegetables", "vegan"],
+          "dietary": ["vegetarian", "vegan", "gluten-free"]
+        }
+      ]
+    },
+    {
+      "name": "Sides",
+      "items": [
+        {
+          "id": 20,
+          "name": "French Fries",
+          "price": 5.99,
+          "keywords": ["fries", "french fries"],
+          "dietary": ["vegetarian", "vegan"]
+        },
+        {
+          "id": 21,
+          "name": "Garlic Mashed Potatoes",
+          "price": 6.99,
+          "keywords": ["mashed potatoes", "potatoes", "garlic mashed"],
+          "dietary": ["vegetarian", "gluten-free"]
+        },
+        {
+          "id": 22,
+          "name": "Steamed Vegetables",
+          "price": 5.99,
+          "keywords": ["vegetables", "veggies", "steamed"],
+          "dietary": ["vegetarian", "vegan", "gluten-free"]
+        },
+        {
+          "id": 23,
+          "name": "Wild Rice Pilaf",
+          "price": 5.99,
+          "keywords": ["rice", "pilaf", "wild rice"],
+          "dietary": ["vegetarian", "vegan", "gluten-free"]
+        },
+        {
+          "id": 24,
+          "name": "Creamed Spinach",
+          "price": 6.99,
+          "keywords": ["spinach", "creamed spinach"],
+          "dietary": ["vegetarian", "gluten-free"]
+        }
+      ]
+    },
+    {
+      "name": "Desserts",
+      "items": [
+        {
+          "id": 30,
+          "name": "Chocolate Lava Cake",
+          "price": 9.99,
+          "keywords": ["chocolate cake", "lava cake", "cake"],
+          "dietary": ["vegetarian"]
+        },
+        {
+          "id": 31,
+          "name": "New York Cheesecake",
+          "price": 8.99,
+          "keywords": ["cheesecake", "new york cheesecake"],
+          "dietary": ["vegetarian"]
+        },
+        {
+          "id": 32,
+          "name": "Vanilla Bean Ice Cream",
+          "price": 6.99,
+          "keywords": ["ice cream", "vanilla ice cream"],
+          "dietary": ["vegetarian", "gluten-free"]
+        },
+        {
+          "id": 33,
+          "name": "Tiramisu",
+          "price": 9.99,
+          "keywords": ["tiramisu"],
+          "dietary": ["vegetarian"]
+        },
+        {
+          "id": 34,
+          "name": "Fresh Fruit Sorbet",
+          "price": 7.99,
+          "keywords": ["sorbet", "fruit sorbet"],
+          "dietary": ["vegetarian", "vegan", "gluten-free"]
+        }
+      ]
+    },
+    {
+      "name": "Beverages",
+      "items": [
+        {
+          "id": 40,
+          "name": "Fresh Brewed Coffee",
+          "price": 3.99,
+          "keywords": ["coffee"],
+          "dietary": ["vegan"]
+        },
+        {
+          "id": 41,
+          "name": "Organic Tea",
+          "price": 3.99,
+          "keywords": ["tea", "hot tea"],
+          "dietary": ["vegan"]
+        },
+        {
+          "id": 42,
+          "name": "Soft Drinks",
+          "price": 2.99,
+          "keywords": ["soda", "coke", "pepsi", "sprite", "soft drink"],
+          "dietary": ["vegan"]
+        },
+        {
+          "id": 43,
+          "name": "Sparkling Water",
+          "price": 4.99,
+          "keywords": ["water", "sparkling water", "pellegrino"],
+          "dietary": ["vegan"]
+        },
+        {
+          "id": 44,
+          "name": "Fresh Squeezed Orange Juice",
+          "price": 5.99,
+          "keywords": ["juice", "orange juice", "oj"],
+          "dietary": ["vegan"]
+        },
+        {
+          "id": 45,
+          "name": "House Red Wine",
+          "price": 9.99,
+          "keywords": ["wine", "red wine", "house wine"],
+          "dietary": ["vegan"]
+        },
+        {
+          "id": 46,
+          "name": "House White Wine",
+          "price": 9.99,
+          "keywords": ["wine", "white wine", "house wine"],
+          "dietary": ["vegan"]
+        },
+        {
+          "id": 47,
+          "name": "Draft Beer",
+          "price": 6.99,
+          "keywords": ["beer", "draft beer"],
+          "dietary": ["vegan"]
+        },
+        {
+          "id": 48,
+          "name": "Classic Margarita",
+          "price": 12.99,
+          "keywords": ["margarita", "cocktail"],
+          "dietary": ["vegan"]
+        }
+      ]
+    }
+  ]
+}
