@@ -1,220 +1,70 @@
-# Restaurant AI Staff Assistance System
+# The Reserve
 
-An AI-powered system that detects customer needs via computer vision, processes audio commands, and intelligently assigns tasks to restaurant staff.
+Smart restaurant assistant that uses computer vision and audio to detect when customers need help and assigns the right staff member.
 
-## Features
+## What it does
 
-- **Computer Vision**: YOLOv8 object detection for person tracking, MediaPipe pose estimation for gesture detection (hand raises)
-- **Audio Processing**: OpenAI Whisper for speech-to-text, intent classification, and menu item extraction
-- **Smart Assignment**: Hungarian algorithm for optimal staff-to-task assignment
-- **Real-time Dashboard**: React-based dashboard with floor plan visualization and event monitoring
-- **Priority Queue**: Urgency-based task prioritization with configurable scoring
+- Detects hand raises and gestures using camera feeds (YOLOv8 + MediaPipe)
+- Transcribes customer requests with Whisper
+- Figures out who's the best staff member to handle each request
+- Shows everything on a real-time dashboard
 
-## Technology Stack
+## Tech
 
-- **Backend**: Python 3.11+, FastAPI, SQLAlchemy, WebSockets
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Zustand, Recharts
-- **ML/AI**: YOLOv8 (ultralytics), MediaPipe, OpenAI Whisper, sentence-transformers
-- **Database**: SQLite with async support (aiosqlite)
+**Backend:** Python, FastAPI, SQLite
+**Frontend:** React, TypeScript, Tailwind
+**ML:** YOLOv8, MediaPipe, Whisper
 
-## Project Structure
+## Getting Started
 
-```
-restaurant-ai/
-├── backend/
-│   ├── app/
-│   │   ├── main.py              # FastAPI application
-│   │   ├── config.py            # Configuration settings
-│   │   ├── models/              # SQLAlchemy models
-│   │   ├── api/routes/          # API endpoints
-│   │   ├── core/                # AI engine (orchestrator, state machine, etc.)
-│   │   ├── vision/              # Computer vision modules
-│   │   ├── audio/               # Audio processing modules
-│   │   ├── location/            # Zone management and simulation
-│   │   └── services/            # Notification, analytics, sensor fusion
-│   ├── tests/
-│   ├── requirements.txt
-│   └── Dockerfile
-├── frontend/
-│   ├── src/
-│   │   ├── components/          # React components
-│   │   ├── hooks/               # Custom hooks (WebSocket)
-│   │   ├── stores/              # Zustand state management
-│   │   └── types/               # TypeScript types
-│   ├── package.json
-│   └── Dockerfile
-├── data/
-│   └── menu.json                # Sample menu for NER
-├── docker-compose.yml
-└── README.md
-```
-
-## Quick Start
-
-### Using Docker (Recommended)
+### Docker (easiest)
 
 ```bash
-# Clone and navigate to project
-cd restaurant-ai
-
-# Start all services
 docker-compose up -d
-
-# Access the dashboard at http://localhost:5173
-# API docs at http://localhost:8000/docs
 ```
 
-### Manual Setup
+Dashboard: http://localhost:5173
+API: http://localhost:8000/docs
 
-#### Backend
+### Manual
 
+Backend:
 ```bash
 cd backend
-
-# Create virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate
 pip install -r requirements.txt
-
-# Run the server
-uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+uvicorn app.main:app --reload
 ```
 
-#### Frontend
-
+Frontend:
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Run development server
 npm run dev
 ```
 
-## API Endpoints
+## How it works
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/tables` | GET | List all tables |
-| `/api/tables/{id}` | GET | Get specific table |
-| `/api/tables` | POST | Create table |
-| `/api/tables/{id}` | PUT | Update table |
-| `/api/tables/{id}/seat` | POST | Seat customers |
-| `/api/staff` | GET | List all staff |
-| `/api/staff/available` | GET | Get available staff |
-| `/api/staff/{id}/assign/{table_id}` | POST | Assign table to staff |
-| `/api/events` | GET | Get events |
-| `/api/events` | POST | Create event (testing) |
-| `/api/events/{id}/resolve` | PUT | Resolve event |
-| `/ws` | WebSocket | Real-time updates |
+1. Camera detects people and gestures at tables
+2. Audio gets transcribed and classified (ordering, complaint, question, etc.)
+3. System tracks table states (empty → seated → ordering → waiting → served → paying)
+4. Hungarian algorithm assigns the nearest available staff
+5. Dashboard shows everything in real-time via WebSocket
 
-## Core Algorithms
+## Config
 
-### Priority Scoring
-
-```python
-urgency = base_wait_time_score
-        + gesture_detected * 30
-        + frustration_detected * 50
-        + verbal_request * 40
-        + payment_ready * 20
-```
-
-### Table State Machine
+Create a `.env` file in backend/:
 
 ```
-EMPTY → SEATED (person detected)
-SEATED → ORDERING (menu interaction / hand raise)
-ORDERING → WAITING (order placed)
-WAITING → SERVED (food delivered)
-SERVED → PAYING (check requested)
-PAYING → EMPTY (payment complete)
-```
-
-### Staff Assignment
-
-Uses Hungarian algorithm with cost matrix considering:
-- Distance to table
-- Current workload
-- Skill match
-- Historical response time
-
-## Configuration
-
-Environment variables (`.env` file):
-
-```env
 DEBUG=true
 DATABASE_URL=sqlite+aiosqlite:///./restaurant.db
-YOLO_MODEL=yolov8n.pt
-WHISPER_MODEL=base
 ```
 
 ## Testing
 
-### Backend Tests
+The dashboard has simulation buttons to test without real cameras. You can also hit the API directly to inject events.
 
 ```bash
-cd backend
-pytest
+cd backend && pytest
 ```
-
-### Manual Testing
-
-1. Start backend and frontend
-2. Open dashboard at http://localhost:5173
-3. Use "Simulate Hand Raise" or "Simulate Seating" buttons
-4. Verify events appear in the feed
-5. Check staff assignments in the staff panel
-
-## Architecture
-
-### Vision Pipeline
-
-1. Video frame captured (file or webcam)
-2. YOLO detects persons in frame
-3. Bounding boxes passed to MediaPipe for pose estimation
-4. Gestures (hand raise) detected from pose landmarks
-5. Persons tracked across frames using IoU-based tracker
-6. Events emitted to orchestrator
-
-### Audio Pipeline
-
-1. Audio captured/transcribed via Whisper
-2. Intent classified (order, question, complaint, etc.)
-3. Named entities extracted (menu items, quantities)
-4. Request added to priority queue
-
-### Orchestrator Flow
-
-1. Receives events from vision/audio pipelines
-2. Updates table state machines
-3. Adds requests to priority queue
-4. Runs assignment algorithm
-5. Dispatches notifications to staff
-6. Broadcasts updates via WebSocket
-
-## Simulation Mode
-
-Since real hardware (CCTV, BLE beacons) isn't available in prototype:
-
-- **Video**: Supports file input or webcam
-- **Audio**: Uses microphone or pre-recorded samples
-- **Location**: Simulated staff movement with patrol routes
-- **Events**: Manual injection via API/dashboard buttons
-
-## Future Enhancements
-
-- Redis/Celery for production task queue
-- PostgreSQL for production database
-- Real BLE/WiFi integration for staff tracking
-- POS system integration
-- Mobile app for staff notifications
-- Voice commands via TTS earpiece integration
-
-## License
-
-MIT License
