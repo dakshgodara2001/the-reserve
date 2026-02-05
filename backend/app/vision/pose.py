@@ -103,7 +103,11 @@ class PoseEstimator:
 
         # Gesture detection thresholds
         self.hand_raise_threshold = 0.15  # Wrist above shoulder by this margin
-        self.wave_motion_threshold = 0.05
+        self.wave_elbow_angle_max = 150  # Max elbow angle for waving (bent arm)
+        self.pointing_elbow_angle_min = 160  # Min elbow angle for pointing (straight arm)
+        self.pointing_height_tolerance = 0.08  # Wrist-shoulder vertical tolerance
+        self.head_turn_threshold = 0.12  # Nose offset from shoulder midpoint
+        self.head_turn_ear_ratio = 2.0  # Ear visibility ratio for head turn
         self.forward_lean_threshold = 0.1
 
     def initialize(self):
@@ -208,9 +212,19 @@ class PoseEstimator:
         """Detect gestures from pose landmarks."""
         gestures = []
 
-        # Check hand raise
-        if self._is_hand_raised(landmarks):
+        # Check waving (more specific than hand raise, check first)
+        if self._is_waving(landmarks):
+            gestures.append(GestureType.WAVING)
+        elif self._is_hand_raised(landmarks):
             gestures.append(GestureType.HAND_RAISE)
+
+        # Check pointing
+        if self._is_pointing(landmarks):
+            gestures.append(GestureType.POINTING)
+
+        # Check head turn
+        if self._is_head_turned(landmarks):
+            gestures.append(GestureType.HEAD_TURN)
 
         # Check leaning forward
         if self._is_leaning_forward(landmarks):
@@ -250,6 +264,119 @@ class PoseEstimator:
         )
 
         return left_raised or right_raised
+
+    def _angle_at(self, a: Landmark, b: Landmark, c: Landmark) -> float:
+        """Calculate angle in degrees at point b formed by a-b-c."""
+        ba = np.array([a.x - b.x, a.y - b.y])
+        bc = np.array([c.x - b.x, c.y - b.y])
+        cos_angle = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc) + 1e-6)
+        cos_angle = np.clip(cos_angle, -1.0, 1.0)
+        return float(np.degrees(np.arccos(cos_angle)))
+
+    def _is_waving(self, landmarks: Dict[str, Landmark]) -> bool:
+        """Check if person is waving (hand above head with bent elbow)."""
+        nose = landmarks.get("nose")
+        left_wrist = landmarks.get("left_wrist")
+        right_wrist = landmarks.get("right_wrist")
+        left_elbow = landmarks.get("left_elbow")
+        right_elbow = landmarks.get("right_elbow")
+        left_shoulder = landmarks.get("left_shoulder")
+        right_shoulder = landmarks.get("right_shoulder")
+
+        if not all([nose, left_wrist, right_wrist, left_elbow, right_elbow,
+                    left_shoulder, right_shoulder]):
+            return False
+
+        # Waving: wrist above nose (higher than a simple hand raise)
+        # with a bent elbow (distinguishes from just reaching up)
+        left_waving = (
+            left_wrist.visibility > 0.5
+            and left_elbow.visibility > 0.5
+            and left_shoulder.visibility > 0.5
+            and nose.visibility > 0.5
+            and left_wrist.y < nose.y
+            and self._angle_at(left_shoulder, left_elbow, left_wrist)
+            < self.wave_elbow_angle_max
+        )
+
+        right_waving = (
+            right_wrist.visibility > 0.5
+            and right_elbow.visibility > 0.5
+            and right_shoulder.visibility > 0.5
+            and nose.visibility > 0.5
+            and right_wrist.y < nose.y
+            and self._angle_at(right_shoulder, right_elbow, right_wrist)
+            < self.wave_elbow_angle_max
+        )
+
+        return left_waving or right_waving
+
+    def _is_pointing(self, landmarks: Dict[str, Landmark]) -> bool:
+        """Check if person is pointing (arm extended straight and roughly horizontal)."""
+        left_wrist = landmarks.get("left_wrist")
+        right_wrist = landmarks.get("right_wrist")
+        left_elbow = landmarks.get("left_elbow")
+        right_elbow = landmarks.get("right_elbow")
+        left_shoulder = landmarks.get("left_shoulder")
+        right_shoulder = landmarks.get("right_shoulder")
+
+        if not all([left_wrist, right_wrist, left_elbow, right_elbow,
+                    left_shoulder, right_shoulder]):
+            return False
+
+        shoulder_mid_x = (left_shoulder.x + right_shoulder.x) / 2
+
+        # Pointing: arm nearly straight, wrist at roughly shoulder height,
+        # and wrist extended away from body center
+        left_pointing = (
+            left_wrist.visibility > 0.5
+            and left_elbow.visibility > 0.5
+            and left_shoulder.visibility > 0.5
+            and self._angle_at(left_shoulder, left_elbow, left_wrist)
+            > self.pointing_elbow_angle_min
+            and abs(left_wrist.y - left_shoulder.y) < self.pointing_height_tolerance
+            and left_wrist.x < shoulder_mid_x
+        )
+
+        right_pointing = (
+            right_wrist.visibility > 0.5
+            and right_elbow.visibility > 0.5
+            and right_shoulder.visibility > 0.5
+            and self._angle_at(right_shoulder, right_elbow, right_wrist)
+            > self.pointing_elbow_angle_min
+            and abs(right_wrist.y - right_shoulder.y) < self.pointing_height_tolerance
+            and right_wrist.x > shoulder_mid_x
+        )
+
+        return left_pointing or right_pointing
+
+    def _is_head_turned(self, landmarks: Dict[str, Landmark]) -> bool:
+        """Check if person's head is turned to the side (looking around for staff)."""
+        nose = landmarks.get("nose")
+        left_shoulder = landmarks.get("left_shoulder")
+        right_shoulder = landmarks.get("right_shoulder")
+        left_ear = landmarks.get("left_ear")
+        right_ear = landmarks.get("right_ear")
+
+        if not all([nose, left_shoulder, right_shoulder, left_ear, right_ear]):
+            return False
+
+        if nose.visibility < 0.5 or left_shoulder.visibility < 0.5 or right_shoulder.visibility < 0.5:
+            return False
+
+        # Method 1: Nose x is significantly offset from shoulder midpoint
+        shoulder_mid_x = (left_shoulder.x + right_shoulder.x) / 2
+        nose_offset = abs(nose.x - shoulder_mid_x)
+
+        # Method 2: One ear is much more visible than the other
+        ear_vis_ratio = 0.0
+        if left_ear.visibility > 0.1 and right_ear.visibility > 0.1:
+            higher = max(left_ear.visibility, right_ear.visibility)
+            lower = min(left_ear.visibility, right_ear.visibility)
+            ear_vis_ratio = higher / lower
+
+        return (nose_offset > self.head_turn_threshold
+                or ear_vis_ratio > self.head_turn_ear_ratio)
 
     def _is_leaning_forward(self, landmarks: Dict[str, Landmark]) -> bool:
         """Check if person is leaning forward (looking for attention)."""
